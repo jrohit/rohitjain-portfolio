@@ -1,5 +1,7 @@
 import Image from "next/image";
-import { site, headline } from "@/lib/content";
+import Link from "next/link";
+import { site, headline, socials } from "@/lib/content";
+import { DownloadIcon, socialIcons } from "./Icons";
 import ThemeToggle from "./ThemeToggle";
 
 /** The nameplate. Set like a print masthead: rules above and below, name huge. */
@@ -7,14 +9,37 @@ export default function Masthead() {
   return (
     <header className="pt-8 sm:pt-12">
       {/* running head */}
-      <div className="flex items-baseline justify-between gap-4 border-b border-rule pb-3">
+      <div className="flex items-center justify-between gap-4 border-b border-rule pb-3">
         <span className="label">{site.location}</span>
-        <ThemeToggle />
+
+        <div className="flex items-center gap-1.5">
+          {socials.map((s) => {
+            const Icon = socialIcons[s.icon];
+            const external = s.href.startsWith("http");
+            return (
+              <a
+                key={s.label}
+                href={s.href}
+                aria-label={s.label}
+                title={`${s.label} — ${s.handle}`}
+                {...(external ? { target: "_blank", rel: "noreferrer noopener" } : {})}
+                className="grid h-9 w-9 place-items-center rounded-full border border-transparent text-ink-faint transition-colors hover:border-rule hover:text-accent"
+              >
+                <Icon className="h-[1.05rem] w-[1.05rem]" />
+              </a>
+            );
+          })}
+          <span className="mx-1 h-5 w-px bg-rule" aria-hidden />
+          <ThemeToggle />
+        </div>
       </div>
 
       {/* nameplate */}
       <div className="rise border-b border-rule py-10 sm:py-14">
-        <h1 className="font-display text-[3.4rem] leading-[0.9] tracking-[-0.015em] sm:text-[5.5rem] lg:text-[6.75rem]">
+        <h1
+          className="parallax font-display text-[3.4rem] leading-[0.9] tracking-[-0.015em] sm:text-[5.5rem] lg:text-[6.75rem]"
+          style={{ "--depth": 0.04 } as React.CSSProperties}
+        >
           {site.name}
         </h1>
         <p
@@ -48,7 +73,7 @@ export default function Masthead() {
       </div>
 
       {/* portrait + contact rail */}
-      <div className="grid gap-8 border-b border-rule py-10 sm:grid-cols-[160px_1fr] sm:gap-12">
+      <div className="reveal grid gap-8 border-b border-rule py-10 sm:grid-cols-[160px_1fr] sm:gap-12">
         <Image
           src={site.photo}
           alt={site.name}
@@ -56,42 +81,53 @@ export default function Masthead() {
           height={800}
           priority
           sizes="160px"
-          className="h-52 w-40 object-cover object-top"
+          className="parallax h-52 w-40 object-cover object-top"
+          style={{ "--depth": 0.09 } as React.CSSProperties}
         />
-        <dl className="grid grid-cols-2 gap-x-8 gap-y-5 self-center sm:max-w-lg">
-          <div>
-            <dt className="label">Email</dt>
-            <dd className="mt-1.5 text-[0.95rem]">
-              <a href={`mailto:${site.email}`} className="link break-all">
-                {site.email}
-              </a>
-            </dd>
+
+        <div className="self-center">
+          <dl className="grid grid-cols-2 gap-x-8 gap-y-5 sm:max-w-lg">
+            {socials.map((s) => {
+              const Icon = socialIcons[s.icon];
+              const external = s.href.startsWith("http");
+              return (
+                <div key={s.label}>
+                  <dt className="label flex items-center gap-1.5">
+                    <Icon className="h-3 w-3" />
+                    {s.label}
+                  </dt>
+                  <dd className="mt-1.5 text-[0.95rem]">
+                    <a
+                      href={s.href}
+                      {...(external ? { target: "_blank", rel: "noreferrer noopener" } : {})}
+                      className="link break-all"
+                    >
+                      {s.handle}
+                    </a>
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+
+          {/* Résumé: read it in the browser, or take the PDF. */}
+          <div className="mt-7 flex flex-wrap items-center gap-3">
+            <Link
+              href="/resume"
+              className="inline-flex items-center gap-2 border border-ink px-4 py-2 text-[0.85rem] transition-colors hover:bg-ink hover:text-paper"
+            >
+              Read the résumé
+            </Link>
+            <a
+              href={site.resume}
+              download
+              className="inline-flex items-center gap-2 border border-rule px-4 py-2 text-[0.85rem] text-ink-soft transition-colors hover:border-accent hover:text-accent"
+            >
+              <DownloadIcon className="h-3.5 w-3.5" />
+              PDF
+            </a>
           </div>
-          <div>
-            <dt className="label">GitHub</dt>
-            <dd className="mt-1.5 text-[0.95rem]">
-              <a href={site.github} target="_blank" rel="noreferrer noopener" className="link">
-                @jrohit
-              </a>
-            </dd>
-          </div>
-          <div>
-            <dt className="label">LinkedIn</dt>
-            <dd className="mt-1.5 text-[0.95rem]">
-              <a href={site.linkedin} target="_blank" rel="noreferrer noopener" className="link">
-                connectwithrohit
-              </a>
-            </dd>
-          </div>
-          <div>
-            <dt className="label">Home lab</dt>
-            <dd className="mt-1.5 text-[0.95rem]">
-              <a href={site.lab} target="_blank" rel="noreferrer noopener" className="link">
-                mylocalcloud.in
-              </a>
-            </dd>
-          </div>
-        </dl>
+        </div>
       </div>
     </header>
   );

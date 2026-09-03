@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Newsreader, JetBrains_Mono } from "next/font/google";
+import Ambient from "@/components/Ambient";
+import Cursor from "@/components/Cursor";
+import ScrollFX from "@/components/ScrollFX";
 import { site, headline } from "@/lib/content";
 import "./globals.css";
 
@@ -57,19 +60,20 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+// Light is the default regardless of system preference, so the browser chrome
+// is pinned to paper rather than following prefers-color-scheme into dark.
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f3ee" },
-    { media: "(prefers-color-scheme: dark)", color: "#101210" },
-  ],
+  themeColor: "#f4f3ee",
 };
 
 /**
- * Runs before first paint: applies the stored theme (light by default here —
- * this is a print-feeling page), and marks <html class="js">, which is what
- * arms the load animation. Without it the page renders fully at rest.
+ * Runs before first paint. Light is the default and the system preference is
+ * deliberately NOT consulted — this page is meant to read like print, and dark
+ * is an opt-in the visitor makes with the toggle. Only an explicit stored
+ * 'dark' flips it. Also marks <html class="js">, which arms the load and
+ * reveal animations; without it everything renders at rest, fully visible.
  */
-const bootScript = `(function(){var d=document.documentElement;try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches)){d.classList.add('dark')}}catch(e){}d.classList.add('js')})()`;
+const bootScript = `(function(){var d=document.documentElement;try{if(localStorage.getItem('theme')==='dark'){d.classList.add('dark')}}catch(e){}d.classList.add('js')})()`;
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -97,7 +101,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <Ambient />
+        <ScrollFX />
+        <Cursor />
+        <div className="page">{children}</div>
+      </body>
     </html>
   );
 }
