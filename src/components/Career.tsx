@@ -1,4 +1,5 @@
-import { education, experience, skills, site } from "@/lib/content";
+import { education, experience, skills, site, socials } from "@/lib/content";
+import { DownloadIcon, socialIcons } from "./Icons";
 
 export default function Career() {
   return (
@@ -53,18 +54,38 @@ export default function Career() {
           Let&rsquo;s talk about the team you&rsquo;re building.
         </h2>
 
-        <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+        <a
+          href={`mailto:${site.email}`}
+          className="mt-8 inline-block font-display text-[1.5rem] text-accent underline decoration-1 underline-offset-[6px] transition-opacity hover:opacity-70"
+        >
+          {site.email}
+        </a>
+
+        <div className="mt-7 flex flex-wrap items-center gap-2">
+          {socials
+            .filter((s) => s.icon !== "mail")
+            .map((s) => {
+              const Icon = socialIcons[s.icon];
+              return (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex items-center gap-2 rounded-full border border-rule px-4 py-2 text-[0.85rem] text-ink-soft transition-colors hover:border-accent hover:text-accent"
+                >
+                  <Icon className="h-4 w-4" />
+                  {s.label}
+                </a>
+              );
+            })}
           <a
-            href={`mailto:${site.email}`}
-            className="font-display text-[1.5rem] text-accent underline decoration-1 underline-offset-[6px] transition-opacity hover:opacity-70"
+            href={site.resume}
+            download
+            className="inline-flex items-center gap-2 rounded-full border border-rule px-4 py-2 text-[0.85rem] text-ink-soft transition-colors hover:border-accent hover:text-accent"
           >
-            {site.email}
-          </a>
-          <a href={site.linkedin} target="_blank" rel="noreferrer noopener" className="label transition-colors hover:text-ink">
-            LinkedIn
-          </a>
-          <a href={site.github} target="_blank" rel="noreferrer noopener" className="label transition-colors hover:text-ink">
-            GitHub
+            <DownloadIcon className="h-4 w-4" />
+            Résumé
           </a>
         </div>
 

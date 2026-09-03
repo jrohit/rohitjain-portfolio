@@ -16,6 +16,10 @@
   --rule-soft: #e7e5dc;
   --accent: #1e5140;
   --accent-wash: #e4ebe5;
+  /* Second tint for the drifting background, so it isn't six of one colour. */
+  --glow-warm: #b98a3e;
+  --blob-alpha: 0.13;
+  --grid-alpha: 0.5;
 }
 
 .dark {
@@ -28,6 +32,9 @@
   --rule-soft: #21251f;
   --accent: #7fc0a2;
   --accent-wash: #182219;
+  --glow-warm: #d8a95c;
+  --blob-alpha: 0.1;
+  --grid-alpha: 0.28;
 }
 
 @theme inline {
@@ -108,12 +115,210 @@ body {
   animation-delay: var(--rise-delay, 0ms);
 }
 
+
+/* ---------------------------------------------------------------------------
+   AMBIENT LAYER — drifting shapes on a fixed plane behind the content.
+   `--sy` is published by ScrollFX; each shape multiplies it by its own --depth,
+   which is what separates foreground drift from background drift.
+   --------------------------------------------------------------------------- */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.ambient-grid {
+  position: absolute;
+  inset: -20vh -10vw;
+  opacity: var(--grid-alpha);
+  background-image:
+    linear-gradient(to right, var(--rule-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule-soft) 1px, transparent 1px);
+  background-size: 76px 76px;
+  /* Fades out at the edges so the grid never fights the text. */
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, #000 20%, transparent 78%);
+  transform: translate3d(0, calc(var(--sy, 0px) * -0.05), 0);
+  will-change: transform;
+}
+
+.ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, var(--tint), transparent 68%);
+  opacity: var(--blob-alpha);
+  filter: blur(46px);
+  will-change: transform;
+  animation-name: drift;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+/* The scroll parallax and the idle float compose: the wrapper translate is
+   applied by the keyframes' own translate on top of the scroll offset. */
+@keyframes drift {
+  0% {
+    transform: translate3d(0, calc(var(--sy, 0px) * var(--depth) * -1), 0);
+  }
+  33% {
+    transform: translate3d(34px, calc(var(--sy, 0px) * var(--depth) * -1 - 30px), 0) scale(1.08);
+  }
+  66% {
+    transform: translate3d(-26px, calc(var(--sy, 0px) * var(--depth) * -1 + 22px), 0) scale(0.94);
+  }
+  100% {
+    transform: translate3d(18px, calc(var(--sy, 0px) * var(--depth) * -1 - 12px), 0) scale(1.03);
+  }
+}
+
+/* Content sits above the ambient layer. */
+.page {
+  position: relative;
+  z-index: 1;
+}
+
+/* Small per-element parallax — used on the portrait and the nameplate. */
+.parallax {
+  transform: translate3d(0, calc(var(--sy, 0px) * var(--depth, 0.05) * -1), 0);
+  will-change: transform;
+}
+
+/* ---------------------------------------------------------------------------
+   SCROLL REVEAL
+   --------------------------------------------------------------------------- */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------------------------------------------------------------------------
+   CUSTOM POINTER — dot tracks exactly, ring eases in behind it.
+   Only armed once Cursor.tsx confirms a fine pointer, so touch users keep
+   their native behaviour and never get a stuck dot.
+   --------------------------------------------------------------------------- */
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.has-cursor.cursor-on .cursor-dot,
+.has-cursor.cursor-on .cursor-ring {
+  opacity: 1;
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.cursor-ring {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--ink-faint);
+  border-radius: 50%;
+  transition:
+    opacity 0.25s ease,
+    width 0.22s ease,
+    height 0.22s ease,
+    background-color 0.22s ease,
+    border-color 0.22s ease;
+}
+
+/* Over a link or button: ring swells and tints. */
+.has-cursor.cursor-hot .cursor-ring {
+  width: 52px;
+  height: 52px;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.has-cursor.cursor-down .cursor-ring {
+  width: 26px;
+  height: 26px;
+}
+
+/* Hide the OS cursor only where ours is actually drawn, and never over text
+   inputs — a missing I-beam makes a form feel broken. */
+.has-cursor body {
+  cursor: none;
+}
+.has-cursor a,
+.has-cursor button,
+.has-cursor [role="button"],
+.has-cursor summary {
+  cursor: none;
+}
+.has-cursor input,
+.has-cursor textarea,
+.has-cursor select {
+  cursor: auto;
+}
+
+/* ---------------------------------------------------------------------------
+   PRINT — the /resume route is designed to be printed or saved as PDF.
+   --------------------------------------------------------------------------- */
+@media print {
+  .ambient,
+  .cursor-dot,
+  .cursor-ring,
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  a {
+    text-decoration: none !important;
+    color: #000 !important;
+  }
+  /* The sheet owns its own margins via @page, so drop the screen padding. */
+  .resume-sheet {
+    max-width: none;
+    padding: 0;
+  }
+  @page {
+    size: A4;
+    margin: 14mm 13mm;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
   .js .rise {
     animation: none;
+  }
+  .js .reveal {
+    opacity: 1;
+    transform: none;
+  }
+  .ambient-blob {
+    animation: none;
+  }
+  .ambient-blob,
+  .ambient-grid,
+  .parallax {
+    transform: none;
   }
   *,
   *::before,
