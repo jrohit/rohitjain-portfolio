@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Palette: warm-neutral paper, ink with a green bias, one pine accent.
+   Deliberately not the indigo/cyan of the lab site — this is a different voice.
+   --------------------------------------------------------------------------- */
+:root {
+  --paper: #f4f3ee;
+  --surface: #fbfaf7;
+  --ink: #191b16;
+  --ink-soft: #5c6055;
+  --ink-faint: #8b8f82;
+  --rule: #dcdad0;
+  --rule-soft: #e7e5dc;
+  --accent: #1e5140;
+  --accent-wash: #e4ebe5;
+}
+
+.dark {
+  --paper: #101210;
+  --surface: #171a16;
+  --ink: #eae8df;
+  --ink-soft: #9aa093;
+  --ink-faint: #6a7065;
+  --rule: #2a2e27;
+  --rule-soft: #21251f;
+  --accent: #7fc0a2;
+  --accent-wash: #182219;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-soft: var(--rule-soft);
+  --color-accent: var(--accent);
+  --color-accent-wash: var(--accent-wash);
+  --font-display: var(--font-instrument), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-newsreader), Georgia, "Iowan Old Style", serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4rem;
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+/* Small-caps utility label used throughout — the page's connective tissue. */
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* Editorial link underline that sits low and thin. */
+.link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s ease, color 0.2s ease;
+}
+.link:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+/* Page-load sequence — masthead only, and only once JS confirms it is safe.
+   Without html.js everything renders at rest, fully visible. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.js .rise {
+  animation: rise 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--rise-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .js .rise {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
