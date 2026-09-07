@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DownloadIcon, socialIcons } from "@/components/Icons";
-import { education, resume, site, skills, socials } from "@/lib/content";
+import { education, resume, resumeContacts, site, skills } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: `${site.name} — Résumé`,
@@ -47,7 +47,7 @@ export default function ResumePage() {
 
         <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[0.85rem] text-ink-soft">
           <li>{site.location}</li>
-          {socials.map((s) => {
+          {resumeContacts.map((s) => {
             const Icon = socialIcons[s.icon];
             return (
               <li key={s.label}>

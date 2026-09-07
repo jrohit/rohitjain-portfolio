@@ -31,6 +31,16 @@ export const socials = [
   { label: "Home lab", handle: "mylocalcloud.in", href: site.lab, icon: "server" as const },
 ];
 
+/**
+ * Contact line on the résumé — the portfolio URL leads, then the social rail.
+ * Kept separate from `socials` because the site's own masthead and footer
+ * should not link back to the page you are already on; a PDF should.
+ */
+export const resumeContacts = [
+  { label: "Portfolio", handle: "rohitjain.is-a.dev", href: site.url, icon: "globe" as const },
+  ...socials,
+];
+
 /** The headline result. Sits above the fold, on its own. */
 export const headline = {
   metric: "63%",
