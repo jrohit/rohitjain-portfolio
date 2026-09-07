@@ -16,6 +16,16 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// GUARD (2026-09-07): public/RohitJain-Resume.pdf is currently hand-maintained —
+// it is the two-page Carlito résumé with the portfolio link added, NOT the output
+// of this script. Regenerating would replace it with the /resume route's layout,
+// which has an unresolved page-break bug. Set RESUME_FORCE=1 once that is fixed.
+if (!process.env.RESUME_FORCE) {
+  console.error("refusing to overwrite the hand-maintained public/RohitJain-Resume.pdf");
+  console.error("fix the /resume page-break bug first, then re-run with RESUME_FORCE=1");
+  process.exit(1);
+}
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(root, "public", "RohitJain-Resume.pdf");
 const PORT = process.env.RESUME_PORT ?? "3021";

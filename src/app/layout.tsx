@@ -3,7 +3,7 @@ import { Instrument_Serif, Newsreader, JetBrains_Mono } from "next/font/google";
 import Ambient from "@/components/Ambient";
 import Cursor from "@/components/Cursor";
 import ScrollFX from "@/components/ScrollFX";
-import { site, headline } from "@/lib/content";
+import { site, headline, resume } from "@/lib/content";
 import "./globals.css";
 
 const instrument = Instrument_Serif({
@@ -49,13 +49,11 @@ export const metadata: Metadata = {
     url: site.url,
     title: `${site.name} — ${site.role}`,
     description,
-    images: [{ url: site.photo, width: 600, height: 800, alt: site.name }],
   },
   twitter: {
     card: "summary_large_image",
     title: `${site.name} — ${site.role}`,
     description,
-    images: [site.photo],
   },
   robots: { index: true, follow: true },
 };
@@ -83,8 +81,17 @@ const jsonLd = {
   jobTitle: site.role,
   image: `${site.url}${site.photo}`,
   email: `mailto:${site.email}`,
-  address: { "@type": "PostalAddress", addressLocality: "Pune", addressCountry: "IN" },
-  sameAs: [site.github, site.linkedin],
+  description,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Pune",
+    addressRegion: "Maharashtra",
+    addressCountry: "IN",
+  },
+  worksFor: { "@type": "Organization", name: resume.roles[0].company },
+  // Every profile that belongs to the same person. This is what ties the
+  // identity together for search engines, so keep it in sync with `socials`.
+  sameAs: [site.github, site.linkedin, site.lab],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
